@@ -1,4 +1,4 @@
-# KubePulse AI — README
+# KubePulse AI
 
 ## Project Overview
 
@@ -9,17 +9,17 @@ Core ideas:
 - Normalize metrics into Redis streams.
 - Run independent worker processes to analyze streams and publish incidents.
 - Enrich incidents with an on-prem LLM (Ollama) and persist to SQLite.
-- Dashboard consumes REST + WS to display incidents and correlation graphs.
+- The dashboard consumes REST + WebSocket data to display incidents and correlation graphs.
 
 ## Components
 
-- `collectors/normalizer.py` — queries Prometheus, normalizes metrics, writes to Redis streams.
-- `agents/` — analysis workers (CPU, memory, storage, log) that read streams and publish incidents.
-- `correlation/` — finds correlated pod metric pairs and stores graph info in Redis; `db_writer.py` persists metrics and incidents to `kubepulse.db`.
-- `nlp/incident_intelligence.py` — calls Ollama API to create short incident summaries.
-- `api/main.py` — FastAPI server that serves incidents and graph JSON and exposes a WebSocket for live alerts.
-- `dashboard/` — React app that visualizes the graph and incidents.
-- `start_all.sh` — convenience script to bootstrap components (works in a Unix-like environment / WSL).
+- `collectors/normalizer.py` - queries Prometheus, normalizes metrics, writes to Redis streams.
+- `agents/` - analysis workers (CPU, memory, storage, log) that read streams and publish incidents.
+- `correlation/` - finds correlated pod metric pairs and stores graph info in Redis; `db_writer.py` persists metrics and incidents to `kubepulse.db`.
+- `nlp/incident_intelligence.py` - calls the Ollama API to create short incident summaries.
+- `api/main.py` - FastAPI server that serves incidents and graph JSON and exposes a WebSocket for live alerts.
+- `dashboard/` - React app that visualizes the graph and incidents.
+- `start_all.sh` - convenience script to bootstrap components (works in a Unix-like environment or WSL).
 
 ## Prerequisites
 
@@ -27,14 +27,13 @@ Core ideas:
 - Python 3.11+ installed.
 - Docker (optional, recommended for Redis/Prometheus/Loki), or local Redis/Prometheus/Loki services.
 - Redis accessible at `localhost:6379` by default.
-- Prometheus & Loki accessible at default ports used by your cluster.
-- Ollama (or alternative LLM) reachable via HTTP if you want NLP enrichments.
+- Prometheus and Loki accessible at the ports used by your cluster.
+- Ollama, or an alternative LLM, reachable via HTTP if you want NLP enrichments.
 
-## Quick Setup (Development)
+## Quick Setup
 
 1. Clone the repo and open the project root.
-
-2. Create and activate a Python virtualenv:
+2. Create and activate a Python virtual environment:
 
 ```bash
 python -m venv .venv
@@ -49,19 +48,16 @@ source .venv/bin/activate   # macOS/Linux
 pip install -r requirements.txt
 ```
 
-4. Start Redis (using Docker):
+4. Start Redis using Docker:
 
 ```bash
 docker run -d --name redis -p 6379:6379 redis:7
 ```
 
-5. Option A — Start pipeline manually (recommended for debugging):
+5. Start the pipeline manually:
 
 ```bash
-# Run normalizer
 python collectors/normalizer.py &
-
-# In separate shells run each worker
 python -m agents.cpu_worker &
 python -m agents.memory_worker &
 python -m agents.storage_worker &
@@ -71,7 +67,7 @@ python -m correlation.db_writer &
 python -m nlp.incident_intelligence &
 ```
 
-6. Start API server (in another shell):
+6. Start the API server in another shell:
 
 ```bash
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
@@ -85,18 +81,18 @@ npm install
 npm start
 ```
 
-8. (Optional) On Unix-like systems you can run `start_all.sh` to try an automated startup. On Windows, use WSL or start components manually as above.
+8. On Unix-like systems, you can try `start_all.sh` to automate startup. On Windows, use WSL or start components manually.
 
 ## Configuration
 
-Currently the project contains hardcoded endpoints (Redis host/port, Prometheus, Loki, Ollama). To adapt:
+The project currently uses hardcoded endpoints for Redis, Prometheus, Loki, and Ollama. To adapt it:
 
-- Edit the host/URL constants at the top of the relevant modules (`collectors/normalizer.py`, `agents/log_worker.py`, `nlp/incident_intelligence.py`).
+- Edit the host and URL constants at the top of the relevant modules.
 - Consider exporting these values as environment variables and loading them with `python-dotenv` or `os.environ`.
 
 ## Database
 
-- The SQLite DB is `kubepulse.db` at the project root. It's excluded by `.gitignore`.
+- The SQLite DB is `kubepulse.db` at the project root. It is excluded by `.gitignore`.
 - For production or concurrent writes, consider migrating to Postgres or another client-server RDBMS.
 
 ## Troubleshooting
@@ -107,20 +103,13 @@ Currently the project contains hardcoded endpoints (Redis host/port, Prometheus,
 
 ## Recommended Improvements
 
-- Add `requirements.txt` (done) and consider `pyproject.toml` for reproducible builds.
+- Add `pyproject.toml` for reproducible builds.
 - Move configuration to environment variables and add a `config.py` loader.
-- Add structured `logging` instead of `print` statements.
-- Use Redis consumer groups (`XGROUP`) for robust, scalable workers and offset management.
-- Add `docker-compose.yml` to simplify running Redis, Prometheus, Loki, and a mock Ollama for local dev.
+- Add structured logging instead of `print` statements.
+- Use Redis consumer groups for robust, scalable workers and offset management.
+- Add `docker-compose.yml` to simplify running Redis, Prometheus, Loki, and a mock Ollama for local development.
 
 ## Contributing
 
 1. Create an issue describing the change.
 2. Open a pull request with a focused change and tests where applicable.
-
----
-
-If you'd like, I can also:
-- Add a `docker-compose.yml` to spin up Redis + Prometheus + Loki + mock Ollama.
-- Convert hardcoded endpoints to environment-driven configuration.
-- Add a `README.md` instead of `read.md` (conventional).
