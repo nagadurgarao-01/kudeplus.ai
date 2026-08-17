@@ -128,4 +128,4 @@ async def alerts_ws(ws: WebSocket):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run('api.main:app', host=config.API_HOST, port=config.API_PORT, reload=True)
+    uvicorn.run(app, host=config.API_HOST, port=config.API_PORT, log_level='info')

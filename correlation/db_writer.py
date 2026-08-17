@@ -1,6 +1,7 @@
 import sys
 import time
 import sqlite3
+import redis
 from pathlib import Path
 
 # Add project root to sys.path
@@ -76,6 +77,8 @@ def persist_metrics():
                         print(f"[DB Writer] Error inserting metric row {rec_id}: {row_err}")
             if inserted > 0:
                 con.commit()
+    except (redis.exceptions.TimeoutError, TimeoutError):
+        pass
     except Exception as e:
         print(f"[DB Writer] Error persisting metrics: {e}")
 
@@ -107,6 +110,8 @@ def persist_incidents():
             if count > 0:
                 con.commit()
                 print(f"[DB Writer] Successfully saved {count} enriched incident(s) to SQLite")
+    except (redis.exceptions.TimeoutError, TimeoutError):
+        pass
     except Exception as e:
         print(f"[DB Writer] Error persisting incidents: {e}")
 

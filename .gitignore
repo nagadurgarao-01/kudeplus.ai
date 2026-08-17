@@ -1,14 +1,13 @@
 # Python
+venv
 venv/
 env/
+.venv
+.venv/
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-
-# Virtualenv
-venv/
-/.venv/
 
 # SQLite DB
 kubepulse.db

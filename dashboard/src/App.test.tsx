@@ -2,8 +2,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+jest.mock('react-force-graph-2d', () => {
+  return function MockForceGraph2D() {
+    return <div data-testid="mock-force-graph">ForceGraph2D</div>;
+  };
 });
+
+test('renders KubePulse dashboard header', () => {
+  render(<App />);
+  const brandElement = screen.getByText(/KubePulse/i);
+  expect(brandElement).toBeInTheDocument();
+});
+

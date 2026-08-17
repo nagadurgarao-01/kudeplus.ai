@@ -9,14 +9,24 @@ import config
 
 r = config.get_redis_client()
 
+last_alert_time = {}
+ALERT_COOLDOWN = 15 # seconds
+
 def publish_alert(pod, namespace, severity, reason, recommendation):
+    now = int(time.time())
+    alert_type = reason.split(':')[0]
+    alert_key = f"{pod}:{severity}:{alert_type}"
+    if alert_key in last_alert_time and (now - last_alert_time[alert_key] < ALERT_COOLDOWN):
+        return
+
+    last_alert_time[alert_key] = now
     alert = {
         'pod': pod,
         'namespace': namespace,
         'severity': severity,        # LOW / MEDIUM / HIGH / CRITICAL
         'reason': reason,
         'recommendation': recommendation,
-        'timestamp': int(time.time())
+        'timestamp': now
     }
     try:
         r.xadd('incidents', alert, maxlen=500)

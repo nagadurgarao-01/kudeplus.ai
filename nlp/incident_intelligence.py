@@ -52,9 +52,10 @@ if __name__ == '__main__':
     except Exception:
         last_id = '0'
 
+    import redis
     while True:
         try:
-            msgs = r.xread({'incidents': last_id}, count=5, block=5000)
+            msgs = r.xread({'incidents': last_id}, count=5, block=2000)
             if msgs:
                 for stream, records in msgs:
                     for rec_id, alert in records:
@@ -66,6 +67,9 @@ if __name__ == '__main__':
                         except Exception as alert_err:
                             print(f"[NLP] Error processing alert {rec_id}: {alert_err}")
                         last_id = rec_id
+        except (redis.exceptions.TimeoutError, TimeoutError):
+            # Normal timeout when no new incidents arrive during the block window
+            pass
         except Exception as e:
             print(f"[NLP] Stream read error: {e}")
             time.sleep(2)

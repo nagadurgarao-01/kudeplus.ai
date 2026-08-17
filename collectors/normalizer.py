@@ -14,7 +14,7 @@ r = config.get_redis_client()
 QUERIES = {
     'metrics.cpu':     'rate(container_cpu_usage_seconds_total[1m])',
     'metrics.memory':  'container_memory_usage_bytes',
-    'metrics.storage': 'container_fs_writes_bytes_total',
+    'metrics.storage': 'rate(container_fs_writes_bytes_total[1m])',
 }
 
 def fetch_metric(query):

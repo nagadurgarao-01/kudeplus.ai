@@ -40,5 +40,8 @@ def get_redis_client():
         host=REDIS_HOST,
         port=REDIS_PORT,
         password=REDIS_PASSWORD,
-        decode_responses=True
+        decode_responses=True,
+        socket_timeout=None,
+        socket_connect_timeout=10,
+        health_check_interval=30
     )
